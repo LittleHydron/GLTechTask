@@ -25,55 +25,43 @@ int main(void) {
     std::string path = "";
     try {
         for (const auto &entry: std::filesystem::directory_iterator(rootDirectory)) {
-            if (entry.path().filename().c_str() == filename) {
-                path = entry.path().c_str();
-                found = true;
+            if (entry.path().filename().string() == filename) {
+                path = entry.path().string();
                 *shouldStop = true;
                 break;
             }
-            while(numOfThreads < maxThreadsNum && !threadsToBeActivated.empty()) {
-                std::string directory = threadsToBeActivated.front();
-                threadsToBeActivated.pop();
-                threads.push_back(std::thread([&]() {
-                    ++ numOfThreads;
-                    std::string tmp = isPresent(filename, directory, shouldStop);
-                    if (tmp != "") {
-                        *shouldStop = true;
-                        found = true;
-                        path = tmp;
-                    }
-                    -- numOfThreads;
-                }));
-            }
-            if (entry.is_directory()) {
-                threadsToBeActivated.push(entry.path().c_str());
-            }
         }
-        while(!threadsToBeActivated.empty()) {
-            while(numOfThreads >= maxThreadsNum) {
-            }
-            std::string directory = threadsToBeActivated.front();
-            threadsToBeActivated.pop();
-            threads.push_back(std::thread([&]() {
-                ++ numOfThreads;
-                std::string tmp = isPresent(filename, directory, shouldStop);
-                    if (tmp != "") {
-                        *shouldStop = true;
-                        found = true;
-                        path = tmp;
+        if (!(*shouldStop)) {
+            for (const auto &entry: std::filesystem::directory_iterator(rootDirectory)) {
+                if (*shouldStop) {
+                    break;
+                }
+                if (entry.is_directory()) {
+                    while(numOfThreads >= maxThreadsNum) {
                     }
-                -- numOfThreads;
-            }));
+                    if (*shouldStop) {
+                        break;
+                    }
+                    threads.push_back(std::thread([&]() {
+                        ++ numOfThreads;
+                        std::string tmpPath = getPath(filename, entry.path().string(), shouldStop);
+                        if (tmpPath != "") {
+                            path = tmpPath;
+                        }
+                        -- numOfThreads;
+                    }));
+                }
+            }
         }
         for (auto &activeThread: threads) {
             activeThread.join();
         }
-        if (!found) {
+        if (!(*shouldStop)) {
             std::cout << "File not found!\n";
         } else {
             std::cout << "File found at: " << path << '\n';
         }
-    } catch (std::filesystem::__cxx11::filesystem_error ex) {
+    } catch (...) {
         // std::cerr << ex.what() << '\n';
     }
     return 0x0;
