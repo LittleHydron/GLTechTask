@@ -15,7 +15,7 @@ std::string isPresent(const std::string &filename, const std::string &directory,
         try{
             for (const auto &entry: std::filesystem::directory_iterator(currentDirectory)) {
                 if (entry.path().filename().c_str() == filename) {
-                    return entry.path().c_str() << '\n';
+                    return entry.path().c_str();
                 }
                 if (entry.is_directory()) {
                     nextDirectories.push(entry.path().c_str());
