@@ -1,18 +1,14 @@
 This is a program, that searches for a file in your filesystem.
 
 
-To build it, you have to execute following commands from 'build' directory:
+To build it, you have to execute following command from project's root directory:
 
-  "cmake .."
+  "make"
+
+
+Then, you can run it using this command:
   
-  "cmake --build ."
-
-
-Then, you can run it using this commands:
-
-  "cd app"
-  
-  "sudo ./App"
+  "sudo ./GLTechTask"
 
 
 How does it work:
