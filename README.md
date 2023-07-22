@@ -8,11 +8,11 @@ To build it, you have to execute following commands from 'build' directory:
   "cmake --build ."
 
 
-Then, you can run it using this command:
+Then, you can run it using this commands:
 
-  cd app
+  "cd app"
   
-  sudo ./App
+  "sudo ./App"
 
 
 How does it work:
