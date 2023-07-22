@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.0)
+
 project(MyProject)
 
-# Add the subdirectories for the library and application
-add_subdirectory(searchLibrary)
+add_subdirectory(ThreadPoolLibrary)
+add_subdirectory(FileSearchLibrary)
 add_subdirectory(app)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThreadPoolLibrary)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/FileSearchLibrary)
