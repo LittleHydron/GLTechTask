@@ -3,6 +3,6 @@
 #include <string>
 #include <atomic>
 
-std::string isPresent(const std::string&, const std::string&, bool*);
+std::string getPath(const std::string&, const std::string&, bool*);
 
 #endif
