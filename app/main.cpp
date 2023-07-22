@@ -21,10 +21,12 @@ int main(void) {
     std::atomic < bool > found(false);
     std::vector < std::thread > threads;
     std::queue < std::string > threadsToBeActivated;
+
+    std::string path = "";
     try {
         for (const auto &entry: std::filesystem::directory_iterator(rootDirectory)) {
             if (entry.path().filename().c_str() == filename) {
-                std::cout << "File found at: " << entry.path().c_str() << '\n';
+                path = entry.path().c_str();
                 found = true;
                 *shouldStop = true;
                 break;
@@ -34,8 +36,11 @@ int main(void) {
                 threadsToBeActivated.pop();
                 threads.push_back(std::thread([&]() {
                     ++ numOfThreads;
-                    if (isPresent(filename, directory, shouldStop)) {
+                    std::string tmp = isPresent(filename, directory, shouldStop);
+                    if (tmp != "") {
                         *shouldStop = true;
+                        found = true;
+                        path = tmp;
                     }
                     -- numOfThreads;
                 }));
@@ -51,10 +56,12 @@ int main(void) {
             threadsToBeActivated.pop();
             threads.push_back(std::thread([&]() {
                 ++ numOfThreads;
-                if (isPresent(filename, directory, shouldStop)) {
-                    *shouldStop = true;
-                    found = true;
-                }
+                std::string tmp = isPresent(filename, directory, shouldStop);
+                    if (tmp != "") {
+                        *shouldStop = true;
+                        found = true;
+                        path = tmp;
+                    }
                 -- numOfThreads;
             }));
         }
@@ -63,6 +70,8 @@ int main(void) {
         }
         if (!found) {
             std::cout << "File not found!\n";
+        } else {
+            std::cout << "File found at: " << path << '\n';
         }
     } catch (std::filesystem::__cxx11::filesystem_error ex) {
         // std::cerr << ex.what() << '\n';
