@@ -1,11 +1,19 @@
 This is a program, that searches for a file in your filesystem.
 
+
 To build it, you have to execute following commands from 'build' directory:
+
   "cmake .."
+  
   "cmake --build ."
+
+
 Then, you can run it using this command:
+
   cd app
+  
   sudo ./App
+
 
 How does it work:
 
