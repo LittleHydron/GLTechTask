@@ -3,7 +3,7 @@
 #include <iostream>
 #include <queue>
 
-bool isPresent(const std::string &filename, const std::string &directory, bool* shouldStop) {
+std::string isPresent(const std::string &filename, const std::string &directory, bool* shouldStop) {
     std::queue < std::string > nextDirectories;
     nextDirectories.push(directory);
     while(!nextDirectories.empty()) {
@@ -15,8 +15,7 @@ bool isPresent(const std::string &filename, const std::string &directory, bool* 
         try{
             for (const auto &entry: std::filesystem::directory_iterator(currentDirectory)) {
                 if (entry.path().filename().c_str() == filename) {
-                    std::cout << "File found at: " << entry.path().c_str() << '\n';
-                    return true;
+                    return entry.path().c_str() << '\n';
                 }
                 if (entry.is_directory()) {
                     nextDirectories.push(entry.path().c_str());
@@ -26,5 +25,5 @@ bool isPresent(const std::string &filename, const std::string &directory, bool* 
             // std::cerr << ex.what() << '\n';
         }
     }
-    return false;
+    return "";
 }
