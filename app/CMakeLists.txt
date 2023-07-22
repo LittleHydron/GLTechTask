@@ -1,4 +1,5 @@
 project(MyProject)
 
 add_executable(App main.cpp)
-target_link_libraries(App PRIVATE searchLibrary)
+
+target_link_libraries(App PRIVATE ThreadPoolLibrary FileSearchLibrary)

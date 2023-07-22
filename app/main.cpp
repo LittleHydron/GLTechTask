@@ -1,68 +1,51 @@
-#include <iostream>
-#include <thread>
-#include <vector>
-#include <queue>
-#include <atomic>
-#include "../searchLibrary/search.h"
-#include <filesystem>
+#include "FileSearch.h"
+#include "ThreadPool.h"
+#include <mutex>
 
-int main(void) {
-    const std::string rootDirectory = "/";
+const int maxThreads = 8;
+bool *targetFound = new bool(false);
+std::mutex *foundMutex = new std::mutex();
 
-
-    std::cout << "Enter name of the file to be found: ";
-    std::string filename;
-    std::getline(std::cin, filename);
-
-    const int maxThreadsNum = 0x8;
-    std::atomic < int > numOfThreads(0x0);
-    bool* shouldStop;
-    shouldStop = new bool(false);
-    std::atomic < bool > found(false);
-    std::vector < std::thread > threads;
-    std::queue < std::string > threadsToBeActivated;
-
-    std::string path = "";
+void processRoot(const fs::path& rootPath, const std::string& targetName) {
+    ThreadPool pool(maxThreads);
     try {
-        for (const auto &entry: std::filesystem::directory_iterator(rootDirectory)) {
-            if (entry.path().filename().string() == filename) {
-                path = entry.path().string();
-                *shouldStop = true;
-                break;
+        for (const auto& entry : fs::directory_iterator(rootPath)) {
+            if (*targetFound) {
+                return;
             }
-        }
-        if (!(*shouldStop)) {
-            for (const auto &entry: std::filesystem::directory_iterator(rootDirectory)) {
-                if (*shouldStop) {
-                    break;
+            if (entry.path().filename() == targetName) {
+                {
+                    std::lock_guard<std::mutex> lock(*foundMutex);
+                    *targetFound = true;
                 }
-                if (entry.is_directory()) {
-                    while(numOfThreads >= maxThreadsNum) {
-                    }
-                    if (*shouldStop) {
-                        break;
-                    }
-                    threads.push_back(std::thread([&]() {
-                        ++ numOfThreads;
-                        std::string tmpPath = getPath(filename, entry.path().string(), shouldStop);
-                        if (tmpPath != "") {
-                            path = tmpPath;
-                        }
-                        -- numOfThreads;
-                    }));
-                }
+                std::cout << "Found: " << entry.path() << std::endl;
+                return;
             }
-        }
-        for (auto &activeThread: threads) {
-            activeThread.join();
-        }
-        if (!(*shouldStop)) {
-            std::cout << "File not found!\n";
-        } else {
-            std::cout << "File found at: " << path << '\n';
+
+            if (fs::is_directory(entry)) {
+                pool.enqueue(std::bind(findFileOrDirectory, entry.path(), targetName, foundMutex, targetFound));
+            }
         }
     } catch (...) {
-        // std::cerr << ex.what() << '\n';
+        
     }
-    return 0x0;
+}
+
+int main() {
+    fs::path rootPath = "/";
+
+    std::string targetName;
+    std::cout << "Enter name of the file to be found: ";
+    std::getline(std::cin, targetName);
+
+    if (fs::exists(rootPath) && fs::is_directory(rootPath)) {
+        processRoot(rootPath, targetName);
+        if (!(*targetFound)) {
+            std::cout << "File not found!\n";
+        }
+    } else {
+        std::cout << "Invalid root folder path." << std::endl;
+    }
+
+    return 0;
 }
