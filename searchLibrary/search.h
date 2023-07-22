@@ -3,6 +3,6 @@
 #include <string>
 #include <atomic>
 
-bool isPresent(const std::string&, const std::string&, bool*);
+std::string isPresent(const std::string&, const std::string&, bool*);
 
 #endif
